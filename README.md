@@ -43,9 +43,7 @@ The success and effectiveness of the project will be evaluated using the followi
 
 ## 🚩How to Approach this Project
 
-To understand the project, check out the [**Approach File**](https://github.com/Avijit-Jana/cnn-architectures-benchmark/blob/main/Approach.md).
-
-Also check out the [**Final Report**](https://github.com/Avijit-Jana/cnn-architectures-benchmark/blob/main/Final_Report.md).
+To understand the project, check out the [**Approach File**](https://github.com/Avijit-Jana/SeqFlipAttention/blob/main/Approach.md).
 
 <div align="middle">
 
