@@ -1,89 +1,48 @@
-<h1 align="center"> Approach </h1>
+<h1 align="center"> Approach 🚩</h1>
 
 This document outlines the step‑by‑step plan for implementing and evaluating a sequence‑to‑sequence model with attention, trained on a synthetic “reverse sequence” task.
 
 ---
+## 1. Overview
 
-## Data Generation
+Implement a sequence-to-sequence model with an attention mechanism in PyTorch to learn reversing synthetic integer sequences.
 
-1. **Special Tokens**  
-   - `PAD` (index 0) for padding  
-   - `BOS` (index 1) as the first token in each target  
-   - `EOS` (index 2) if future extension to variable‑length outputs is desired  
+## 2. Data Preparation
 
-2. **Sequence Pairs**  
-   - Source: random integers in \[3, vocab_size\)  
-   - Target: `[BOS] + reverse(source)`  
+* **Synthetic Dataset**: Generate `N` random integer sequences of fixed length `L` from a vocabulary `[1, V-1]`.
+* **Target Sequences**: For each source, define the target as the reverse order of the source.
+* **Batching**: Pad sequences to the maximum length per batch and store original lengths for masking.
 
-3. **Dataset & Dataloader**  
-   - PyTorch `Dataset` returns `(src, trg)` pairs  
-   - Custom `collate_fn` pads to max length in batch  
+## 3. Model Architecture
 
----
+1. **Encoder** (Bi-directional GRU)
 
-## Model Architecture
+   * Input embedding → Packed GRU → Hidden states per timestep + final hidden summary.
+2. **Attention** (Bahdanau-style)
 
-```
-Encoder (bidirectional GRU)
-↓
-Hidden Merge
-↓
-Attention Mechanism
-↓
-Decoder (unidirectional GRU + attention context)
-↓
-Linear → Softmax
-```
+   * Compute alignment scores between decoder hidden state and all encoder outputs.
+   * Generate context vector as weighted sum of encoder outputs.
+3. **Decoder** (GRU)
 
-- **Encoder**  
-  - Embedding → 2‑directional GRU → fused hidden state  
-- **Attention**  
-  - Additive (Bahdanau) style: score = `vᵀ tanh(W₁[h] + W₂[enc])`  
-  - Softmax over source time steps  
-- **Decoder**  
-  - At each time step, attends to encoder outputs, concatenates context + embedding, passes through GRU → linear  
+   * Input embedding + context → GRU → Concatenate output & context → Linear projection to vocabulary logits.
+4. **Bridge Layer**
 
----
+   * Project encoder’s bi-directional hidden state to match decoder hidden-size.
 
-## Training Pipeline
+## 4. Training Strategy
 
-1. **Hardware**  
-   - GPU if available, otherwise CPU  
-   - AMP (automatic mixed precision) for speed/memory  
+* **Teacher Forcing**: Toggle between feeding the true token vs. model’s prediction at each timestep.
+* **Loss & Optimizer**: Cross-entropy loss (ignore padding); Adam optimizer.
+* **Regularization**: Dropout in GRU layers & gradient clipping.
+* **Metrics**: Compute both token-level accuracy and loss per epoch.
+* **Logging**: Use TensorBoard (`SummaryWriter`) to record and visualize metrics.
+* **Checkpointing**: Save the model state when validation loss improves.
 
-2. **Optimization**  
-   - Adam optimizer with learning rate scheduling (`ReduceLROnPlateau`)  
-   - Gradient clipping to stabilize training  
+## 5. Evaluation & Visualization
 
-3. **Loss & Metrics**  
-   - Cross‑entropy loss (ignoring pad tokens)  
-   - Validation accuracy: % of sequences fully reversed correctly  
-
-4. **Logging & Checkpoints**  
-   - TensorBoard for loss/accuracy curves  
-   - Save per‑epoch model states; support resume  
-
----
-
-## Evaluation & Visualization
-
-- **Quantitative**  
-  - Plot training loss and validation accuracy over epochs  
-  - Report final accuracy on held‑out set  
-
-- **Qualitative (optional)**  
-  - Inspect attention weights on example sequences  
-  - Visualize which source positions the model attends to  
-
----
-
-## Robustness & Extensions
-
-- Resume training from checkpoints  
-- Easily adjust hyperparameters via CLI flags  
-- Plug-and‑play for variable‑length sequences with an EOS token  
-- Future: apply to real-world seq2seq tasks (translation, summarization)
-
+* **Validation Loop**: Evaluate without teacher forcing to measure real decoding performance.
+* **Plots**: Generate separate loss and accuracy curves for train vs. validation over epochs.
+* **TensorBoard**: Inspect metrics interactively via `tensorboard --logdir runs`.
 
 <div align="middle">
 
