@@ -41,6 +41,11 @@ The success and effectiveness of the project will be evaluated using the followi
 - **Accuracy:** The proportion of correct predictions out of the total predictions made. 
 - **Loss:** The value of the loss function during training and testing.
 
+## Final Outcome
+
+![Loss and Accuracy Graph](Notebooks/Graph.png)
+This graph shows the training and validation loss over epochs. The model is trained to minimize the loss, indicating that it is learning to predict the target sequence from the source sequence effectively.
+
 ## 🚩How to Approach this Project
 
 To understand the project, check out the [**Approach File**](https://github.com/Avijit-Jana/SeqFlipAttention/blob/main/Approach.md).
